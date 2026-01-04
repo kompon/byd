@@ -1,13 +1,20 @@
 "use client";
 
 import {
-    Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
-    Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
-    useDisclosure, Chip, Textarea, Select, SelectItem
-} from "@heroui/react";
+    Table, TableHeader, TableBody, TableRow, TableCell
+} from "@/app/components/ui/table/Table";
+import Button from "@/app/components/ui/button/Button";
+import { ActionButtons } from "@/app/components/ui/button/ActionButtons";
+import { StatusBadge } from "@/app/components/ui/badge/StatusBadge";
+import Input from "@/app/components/form/input/InputField";
+import TextArea from "@/app/components/form/input/TextArea";
+import { Modal } from "@/app/components/ui/modal/Modal";
+import Badge from "@/app/components/ui/badge/Badge";
+import Select from "@/app/components/form/Select";
 import { useEffect, useState } from "react";
-import { Plus, Edit, Trash } from "lucide-react";
+import { Plus, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
 
 type Promotion = {
     id: number;
@@ -25,11 +32,12 @@ type Promotion = {
 export default function PromotionsPage() {
     const [promos, setPromos] = useState<Promotion[]>([]);
     const [loading, setLoading] = useState(true);
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [editingPromo, setEditingPromo] = useState<Partial<Promotion> | null>(null);
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [formData, setFormData] = useState<Partial<Promotion>>({});
+
     const fetchPromos = async () => {
         try {
             const res = await fetch("/api/promotions");
@@ -64,7 +72,7 @@ export default function PromotionsPage() {
             if (res.ok) {
                 toast.success(editingPromo?.id ? "Promotion updated!" : "New promotion created!");
                 fetchPromos();
-                onClose();
+                closeModal();
             } else {
                 toast.error("Failed to save promotion");
             }
@@ -76,7 +84,7 @@ export default function PromotionsPage() {
 
     const confirmDelete = (id: number) => {
         setDeleteId(id);
-        onDeleteOpen();
+        setIsDeleteModalOpen(true);
     };
 
     const handleDelete = async () => {
@@ -85,7 +93,7 @@ export default function PromotionsPage() {
             await fetch(`/api/promotions/${deleteId}`, { method: "DELETE" });
             toast.success("Promotion deleted successfully");
             fetchPromos();
-            onDeleteOpenChange();
+            setIsDeleteModalOpen(false);
         } catch (error) {
             console.error("Error deleting promo:", error);
             toast.error("Failed to delete promotion");
@@ -95,208 +103,217 @@ export default function PromotionsPage() {
     const openModal = (promo?: Promotion) => {
         setEditingPromo(promo || null);
         setFormData(promo || { type: "promotion", is_active: 1 });
-        onOpen();
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setEditingPromo(null);
     };
 
     return (
-        <div className="p-8">
-            <div className="flex justify-between items-end mb-8">
+        <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6 mb-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                 <div>
-                    <h1 className="text-4xl font-bold text-slate-900 mb-2">News & Promotions</h1>
-                    <p className="text-gray-500">Manage your marketing content</p>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-1">ข่าวสารและโปรโมชั่น</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">จัดการเนื้อหาการตลาด</p>
                 </div>
                 <Button
-                    className="bg-gold-500 text-white font-bold shadow-lg shadow-gold-500/20"
-                    endContent={<Plus size={20} />}
-                    onPress={() => openModal()}
-                    size="lg"
+                    variant="primary"
+                    startIcon={<Plus size={20} />}
+                    onClick={() => openModal()}
                 >
-                    Add New Content
+                    เพิ่มเนื้อหาใหม่
                 </Button>
             </div>
 
-            <Table
-                aria-label="Promotions Table"
-                classNames={{
-                    wrapper: "bg-white border border-gray-200 shadow-sm",
-                    th: "bg-gray-50 text-slate-700 border-b border-gray-200",
-                    td: "text-slate-900 py-4"
-                }}
-            >
+            <Table>
                 <TableHeader>
-                    <TableColumn>TITLE</TableColumn>
-                    <TableColumn>TYPE</TableColumn>
-                    <TableColumn>DATE</TableColumn>
-                    <TableColumn>STATUS</TableColumn>
-                    <TableColumn>ACTIONS</TableColumn>
+                    <TableRow>
+                        <TableCell isHeader>หัวข้อ</TableCell>
+                        <TableCell isHeader>ประเภท</TableCell>
+                        <TableCell isHeader>วันที่</TableCell>
+                        <TableCell isHeader>สถานะ</TableCell>
+                        <TableCell isHeader>จัดการ</TableCell>
+                    </TableRow>
                 </TableHeader>
-                <TableBody emptyContent={"No promotions found"} items={promos} isLoading={loading}>
-                    {(item) => (
-                        <TableRow key={item.id}>
-                            <TableCell>{item.title}</TableCell>
-                            <TableCell className="capitalize">{item.type}</TableCell>
-                            <TableCell>{new Date(item.start_date).toLocaleDateString()}</TableCell>
-                            <TableCell>
-                                <Chip color={item.is_active ? "success" : "default"} variant="flat" size="sm">
-                                    {item.is_active ? "ACTIVE" : "INACTIVE"}
-                                </Chip>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex gap-2">
-                                    <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => openModal(item)}>
-                                        <Edit size={18} />
-                                    </span>
-                                    <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => confirmDelete(item.id)}>
-                                        <Trash size={18} />
-                                    </span>
-                                </div>
-                            </TableCell>
+                <TableBody>
+                    {loading ? (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center py-8">Loading...</TableCell>
                         </TableRow>
+                    ) : promos.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center py-8">No promotions found</TableCell>
+                        </TableRow>
+                    ) : (
+                        promos.map((item) => (
+                            <TableRow key={item.id}>
+                                <TableCell>
+                                    <span className="font-semibold text-gray-800 dark:text-white/90">{item.title}</span>
+                                </TableCell>
+                                <TableCell>
+                                    <span className="capitalize">{item.type}</span>
+                                </TableCell>
+                                <TableCell>{new Date(item.start_date).toLocaleDateString()}</TableCell>
+                                <TableCell>
+                                    <StatusBadge isActive={item.is_active} />
+                                </TableCell>
+                                <TableCell>
+                                    <ActionButtons
+                                        onEdit={() => openModal(item)}
+                                        onDelete={() => confirmDelete(item.id)}
+                                    />
+                                </TableCell>
+                            </TableRow>
+                        ))
                     )}
                 </TableBody>
             </Table>
 
-            <Modal isOpen={isOpen} onClose={onClose} size="2xl" className="bg-white border border-gray-200">
-                <ModalContent>
-                    {(onClose) => (
-                        <>
-                            <ModalHeader className="text-slate-900">
-                                {editingPromo?.id ? "Edit Content" : "New Content"}
-                            </ModalHeader>
-                            <ModalBody>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Select
-                                        label="Type"
-                                        variant="bordered"
-                                        selectedKeys={formData.type ? [formData.type] : []}
-                                        onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                                    >
-                                        <SelectItem key="news">News</SelectItem>
-                                        <SelectItem key="promotion">Promotion</SelectItem>
-                                    </Select>
-                                    <Select
-                                        label="Status"
-                                        variant="bordered"
-                                        selectedKeys={formData.is_active !== undefined ? [String(formData.is_active)] : ["1"]}
-                                        onChange={(e) => setFormData({ ...formData, is_active: parseInt(e.target.value ?? "1") })}
-                                    >
-                                        <SelectItem key="1">Active</SelectItem>
-                                        <SelectItem key="0">Inactive</SelectItem>
-                                    </Select>
+            <Modal isOpen={isModalOpen} onClose={closeModal} className="max-w-3xl">
+                <div className="mb-6">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                        {editingPromo?.id ? "Edit Content" : "New Content"}
+                    </h3>
+                </div>
 
-                                    <div className="col-span-2">
-                                        <Input
-                                            label="Title"
-                                            variant="bordered"
-                                            value={formData.title || ""}
-                                            onValueChange={(v) => setFormData({ ...formData, title: v, slug: v.toLowerCase().replace(/\s+/g, '-') })}
-                                        />
-                                    </div>
-                                    <div className="col-span-2">
-                                        <Input
-                                            label="Slug"
-                                            variant="bordered"
-                                            value={formData.slug || ""}
-                                            onValueChange={(v) => setFormData({ ...formData, slug: v })}
-                                        />
-                                    </div>
-                                    <div className="col-span-2 flex flex-col gap-2">
-                                        <label className="text-small">Banner Image</label>
-                                        <div className="flex gap-2 items-center">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gold-500 file:text-black hover:file:bg-gold-600"
-                                                onChange={async (e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (!file) return;
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Select
+                        label="Type"
+                        options={[
+                            { value: "news", label: "News" },
+                            { value: "promotion", label: "Promotion" }
+                        ]}
+                        onChange={(value) => setFormData({ ...formData, type: value as any })}
+                        defaultValue={formData.type}
+                    />
+                    <Select
+                        label="Status"
+                        options={[
+                            { value: "1", label: "Active" },
+                            { value: "0", label: "Inactive" }
+                        ]}
+                        onChange={(value) => setFormData({ ...formData, is_active: parseInt(value) })}
+                        defaultValue={String(formData.is_active !== undefined ? formData.is_active : "1")}
+                    />
 
-                                                    const formData = new FormData();
-                                                    formData.append("file", file);
-
-                                                    try {
-                                                        const res = await fetch("/api/upload", {
-                                                            method: "POST",
-                                                            body: formData
-                                                        });
-                                                        const data = await res.json();
-                                                        if (data.success) {
-                                                            setFormData(prev => ({ ...prev, banner_image_url: data.url }));
-                                                        }
-                                                    } catch (error) {
-                                                        console.error("Upload failed", error);
-                                                        toast.error("Upload failed!");
-                                                    }
-                                                }}
-                                            />
-                                        </div>
-                                        {formData.banner_image_url && (
-                                            <div className="relative w-full h-32 rounded-lg overflow-hidden border border-white/20 mt-2">
-                                                <img
-                                                    src={formData.banner_image_url}
-                                                    alt="Preview"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                        )}
+                    <div className="col-span-1 md:col-span-2">
+                        <Input
+                            label="Title"
+                            value={formData.title || ""}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                        />
+                    </div>
+                    <div className="col-span-1 md:col-span-2">
+                        <Input
+                            label="Slug"
+                            value={formData.slug || ""}
+                            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                        />
+                    </div>
+                    <div className="col-span-1 md:col-span-2 flex flex-col gap-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-400">Banner Image</label>
+                        <div className="flex gap-4 items-start">
+                            <div className="flex-1">
+                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 dark:hover:bg-gray-800 dark:bg-gray-700 dark:border-gray-600">
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <UploadCloud className="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" />
+                                        <p className="text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span></p>
                                     </div>
-                                    <Input
-                                        label="Start Date"
-                                        type="date"
-                                        variant="bordered"
-                                        value={formData.start_date ? formData.start_date.split('T')[0] : ""}
-                                        onValueChange={(v) => setFormData({ ...formData, start_date: v })}
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (!file) return;
+
+                                            const uploadFormData = new FormData();
+                                            uploadFormData.append("file", file);
+
+                                            try {
+                                                const res = await fetch("/api/upload", {
+                                                    method: "POST",
+                                                    body: uploadFormData
+                                                });
+                                                const data = await res.json();
+                                                if (data.success) {
+                                                    setFormData(prev => ({ ...prev, banner_image_url: data.url }));
+                                                }
+                                            } catch (error) {
+                                                console.error("Upload failed", error);
+                                                toast.error("Upload failed!");
+                                            }
+                                        }}
                                     />
-                                    <Input
-                                        label="End Date"
-                                        type="date"
-                                        variant="bordered"
-                                        value={formData.end_date ? formData.end_date.split('T')[0] : ""}
-                                        onValueChange={(v) => setFormData({ ...formData, end_date: v })}
+                                </label>
+                            </div>
+                            {formData.banner_image_url && (
+                                <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-200 shrink-0">
+                                    <Image
+                                        src={formData.banner_image_url}
+                                        alt="Preview"
+                                        fill
+                                        className="object-cover"
                                     />
-                                    <div className="col-span-2">
-                                        <Textarea
-                                            label="Short Description"
-                                            variant="bordered"
-                                            value={formData.short_description || ""}
-                                            onValueChange={(v) => setFormData({ ...formData, short_description: v })}
-                                        />
-                                    </div>
-                                    <div className="col-span-2">
-                                        <Textarea
-                                            label="Content"
-                                            variant="bordered"
-                                            minRows={4}
-                                            value={formData.content || ""}
-                                            onValueChange={(v) => setFormData({ ...formData, content: v })}
-                                        />
-                                    </div>
                                 </div>
-                            </ModalBody>
-                            <ModalFooter>
-                                <Button color="danger" variant="light" onPress={onClose}>Close</Button>
-                                <Button className="bg-gold-500 text-black font-bold" onPress={handleSave}>Save</Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
+                            )}
+                        </div>
+                    </div>
+
+                    <Input
+                        label="Start Date"
+                        type="date"
+                        value={formData.start_date ? formData.start_date.split('T')[0] : ""}
+                        onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    />
+                    <Input
+                        label="End Date"
+                        type="date"
+                        value={formData.end_date ? formData.end_date.split('T')[0] : ""}
+                        onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                    />
+                    <div className="col-span-1 md:col-span-2">
+                        <TextArea
+                            label="Short Description"
+                            rows={2}
+                            value={formData.short_description || ""}
+                            onChange={(value) => setFormData({ ...formData, short_description: value })}
+                        />
+                    </div>
+                    <div className="col-span-1 md:col-span-2">
+                        <TextArea
+                            label="Content"
+                            rows={4}
+                            value={formData.content || ""}
+                            onChange={(value) => setFormData({ ...formData, content: value })}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-6">
+                    <Button variant="outline" onClick={closeModal}>Close</Button>
+                    <Button variant="primary" onClick={handleSave}>Save</Button>
+                </div>
             </Modal>
 
-            <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange}>
-                <ModalContent>
-                    {(onClose) => (
-                        <>
-                            <ModalHeader>Confirm Deletion</ModalHeader>
-                            <ModalBody>
-                                Are you sure you want to delete this promotion? This action cannot be undone.
-                            </ModalBody>
-                            <ModalFooter>
-                                <Button variant="light" onPress={onClose}>Cancel</Button>
-                                <Button color="danger" onPress={handleDelete}>Delete</Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
+            {/* Delete Confirmation Modal */}
+            <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>
+                <div className="mb-4">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">Confirm Deletion</h3>
+                </div>
+                <p className="text-gray-500 mb-6">
+                    Are you sure you want to delete this promotion? This action cannot be undone.
+                </p>
+                <div className="flex justify-end gap-3">
+                    <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={handleDelete}>
+                        Delete
+                    </Button>
+                </div>
             </Modal>
         </div>
     );

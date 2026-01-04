@@ -72,7 +72,7 @@ export const PopupModal = () => {
 
                             {/* Text Section */}
                             <div className={`${content.image ? 'w-full md:w-1/2' : 'w-full'} p-8 flex flex-col justify-center items-center text-center bg-zinc-900`}>
-                                <h2 className="text-2xl font-bold text-gold-400 mb-4 tracking-wide">SPECIAL OFFER</h2>
+                                <h2 className="text-2xl font-bold text-brand-accent mb-4 tracking-wide">SPECIAL OFFER</h2>
                                 <p className="text-white text-lg mb-8 leading-relaxed whitespace-pre-wrap">
                                     {content.text || "Welcome to PRIDE AUTO!"}
                                 </p>

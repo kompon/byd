@@ -1,8 +1,8 @@
 "use client";
 
-import { Card, CardBody, Spinner, Chip } from "@heroui/react";
+import { Card, CardBody } from "@/app/components/ui/card/Card";
 import { useEffect, useState } from "react";
-import { Car, Megaphone, Activity, ArrowUpRight } from "lucide-react";
+import { Car, Megaphone, Activity } from "lucide-react";
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState({ cars: 0, promotions: 0, loading: true });
@@ -30,61 +30,64 @@ export default function AdminDashboard() {
     }, []);
 
     if (stats.loading) {
-        return <div className="p-8 flex justify-center"><Spinner size="lg" color="warning" /></div>;
+        return <div className="p-8 flex justify-center text-gray-500 dark:text-gray-400">Loading...</div>;
     }
 
     return (
-        <div className="p-8">
-            <div className="mb-10">
-                <h1 className="text-4xl font-bold text-slate-900 mb-2">Dashboard</h1>
-                <p className="text-gray-500">Overview of your showroom performance</p>
+        <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6 mb-6">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-2">Dashboard</h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Overview of your showroom performance</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
-                    <CardBody className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-slate-50 rounded-lg group-hover:bg-gold-50 transition-colors">
-                                <Car className="w-6 h-6 text-slate-600 group-hover:text-gold-600" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-0 overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-brand-primary/5 dark:from-blue-500/10 dark:to-brand-primary/10"></div>
+                    <CardBody className="p-6 relative">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="p-4 bg-gradient-to-br from-brand-primary to-blue-600 rounded-2xl shadow-lg shadow-brand-primary/30">
+                                <Car className="w-7 h-7 text-white" />
                             </div>
-                            <Chip size="sm" classNames={{ base: "bg-slate-100", content: "text-slate-600 font-medium text-xs" }}>+2 New</Chip>
+                            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200 dark:from-emerald-500/10 dark:to-green-500/10 dark:text-emerald-400 dark:border-emerald-500/20">+2 New</span>
                         </div>
                         <div>
-                            <p className="text-slate-500 text-sm font-medium mb-1">Total Car Models</p>
-                            <h3 className="text-3xl font-bold text-slate-800">{stats.cars}</h3>
+                            <p className="text-gray-600 text-sm font-semibold mb-2 dark:text-gray-400 uppercase tracking-wider">Total Car Models</p>
+                            <h3 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">{stats.cars}</h3>
                         </div>
                     </CardBody>
                 </Card>
 
-                <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
-                    <CardBody className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-slate-50 rounded-lg group-hover:bg-gold-50 transition-colors">
-                                <Megaphone className="w-6 h-6 text-slate-600 group-hover:text-gold-600" />
+                <Card className="hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-0 overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 dark:from-emerald-500/10 dark:to-green-500/10"></div>
+                    <CardBody className="p-6 relative">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="p-4 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl shadow-lg shadow-emerald-500/30">
+                                <Megaphone className="w-7 h-7 text-white" />
                             </div>
-                            <Chip size="sm" classNames={{ base: "bg-green-50", content: "text-green-600 font-medium text-xs" }}>Active</Chip>
+                            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200 dark:from-emerald-500/10 dark:to-green-500/10 dark:text-emerald-400 dark:border-emerald-500/20">Active</span>
                         </div>
                         <div>
-                            <p className="text-slate-500 text-sm font-medium mb-1">Active Promotions</p>
-                            <h3 className="text-3xl font-bold text-slate-800">{stats.promotions}</h3>
+                            <p className="text-gray-600 text-sm font-semibold mb-2 dark:text-gray-400 uppercase tracking-wider">Active Promotions</p>
+                            <h3 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">{stats.promotions}</h3>
                         </div>
                     </CardBody>
                 </Card>
 
-                <Card className="bg-white border border-gray-100 shadow-sm">
-                    <CardBody className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-slate-50 rounded-lg">
-                                <Activity className="w-6 h-6 text-slate-600" />
+                <Card className="hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-0 overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 dark:from-blue-500/10 dark:to-indigo-500/10"></div>
+                    <CardBody className="p-6 relative">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="p-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg shadow-blue-500/30">
+                                <Activity className="w-7 h-7 text-white" />
                             </div>
-                            <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-green-50 border border-green-100">
-                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                                <span className="text-[10px] font-bold text-green-700 uppercase">Online</span>
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 dark:from-emerald-500/10 dark:to-green-500/10 dark:border-emerald-500/20">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50"></div>
+                                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase">Online</span>
                             </div>
                         </div>
                         <div>
-                            <p className="text-slate-500 text-sm font-medium mb-1">System Status</p>
-                            <h3 className="text-3xl font-bold text-slate-800">Operational</h3>
+                            <p className="text-gray-600 text-sm font-semibold mb-2 dark:text-gray-400 uppercase tracking-wider">System Status</p>
+                            <h3 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">Operational</h3>
                         </div>
                     </CardBody>
                 </Card>

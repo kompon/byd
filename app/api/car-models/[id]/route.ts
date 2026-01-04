@@ -29,7 +29,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ error: 'Car not found' }, { status: 404 });
         }
 
-        return NextResponse.json(cars[0]);
+        const car = cars[0];
+        const [variants] = await pool.query('SELECT * FROM car_variants WHERE car_model_id = ?', [id]);
+        car.variants = variants;
+
+        return NextResponse.json(car);
     } catch (error) {
         return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
@@ -44,12 +48,23 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     try {
         const { id } = await params;
         const body = await request.json();
-        const { name, slug, description, base_price, status, main_image_url } = body;
+        const { name, slug, description, base_price, status, main_image_url, variants } = body;
 
         await pool.query(
             'UPDATE car_models SET name=?, slug=?, description=?, base_price=?, status=?, main_image_url=? WHERE id=?',
             [name, slug, description, base_price, status, main_image_url, id]
         );
+
+        // Update variants: Delete old, Insert new
+        await pool.query('DELETE FROM car_variants WHERE car_model_id = ?', [id]);
+
+        if (variants && Array.isArray(variants) && variants.length > 0) {
+            const variantValues = variants.map((v: any) => [id, v.name, v.price]);
+            await pool.query(
+                'INSERT INTO car_variants (car_model_id, name, price) VALUES ?',
+                [variantValues]
+            );
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {

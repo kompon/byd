@@ -20,9 +20,17 @@ async function isAuthenticated() {
 
 export async function GET() {
     try {
-        const [rows] = await pool.query('SELECT * FROM car_models ORDER BY created_at DESC');
-        return NextResponse.json(rows);
+        const [cars] = await pool.query('SELECT * FROM car_models ORDER BY created_at DESC');
+        const [variants] = await pool.query('SELECT * FROM car_variants');
+
+        const carsWithVariants = (cars as any[]).map(car => ({
+            ...car,
+            variants: (variants as any[]).filter(v => v.car_model_id === car.id)
+        }));
+
+        return NextResponse.json(carsWithVariants);
     } catch (error) {
+        console.error(error);
         return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 }
@@ -34,14 +42,25 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { name, slug, description, base_price, status, main_image_url } = body;
+        const { name, slug, description, base_price, status, main_image_url, variants } = body;
 
         const [result] = await pool.query(
             'INSERT INTO car_models (name, slug, description, base_price, status, main_image_url) VALUES (?, ?, ?, ?, ?, ?)',
             [name, slug, description, base_price, status || 'active', main_image_url]
         );
 
-        return NextResponse.json({ success: true, id: (result as any).insertId });
+        const carId = (result as any).insertId;
+
+        // Insert variants if any
+        if (variants && Array.isArray(variants) && variants.length > 0) {
+            const variantValues = variants.map((v: any) => [carId, v.name, v.price]);
+            await pool.query(
+                'INSERT INTO car_variants (car_model_id, name, price) VALUES ?',
+                [variantValues]
+            );
+        }
+
+        return NextResponse.json({ success: true, id: carId });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: 'Failed to create car model' }, { status: 500 });

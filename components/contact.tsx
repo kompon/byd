@@ -1,17 +1,23 @@
 "use client";
 
-import { Input, Textarea, Button } from "@heroui/react";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Clock, Send } from "lucide-react";
+import { MapPin, Phone, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 export const ContactSection = () => {
+    const { t } = useLanguage();
     const [settings, setSettings] = useState({
-        contact_address: "123 คลองเตย...",
-        contact_phone: "02-123-4567",
-        contact_email: "contact@example.com",
-        contact_line: "@prideauto",
-        contact_map_url: ""
+        // Branch 1
+        contact_address_1: "123 คลองเตย...",
+        contact_phone_1: "02-123-4567",
+        contact_line_1: "@prideauto",
+        contact_map_url_1: "",
+        // Branch 2
+        contact_address_2: "456 สาทร...",
+        contact_phone_2: "02-789-0123",
+        contact_line_2: "@prideauto2",
+        contact_map_url_2: "",
     });
 
     useEffect(() => {
@@ -26,126 +32,112 @@ export const ContactSection = () => {
             .catch(err => console.error("Failed to load contact info", err));
     }, []);
 
+    const branches = [
+        {
+            name: t("สาขาที่ 1", "Branch 1"),
+            address: settings.contact_address_1,
+            phone: settings.contact_phone_1,
+            line: settings.contact_line_1,
+            mapUrl: settings.contact_map_url_1,
+        },
+        {
+            name: t("สาขาที่ 2", "Branch 2"),
+            address: settings.contact_address_2,
+            phone: settings.contact_phone_2,
+            line: settings.contact_line_2,
+            mapUrl: settings.contact_map_url_2,
+        }
+    ];
+
     return (
-        <section id="contact" className="py-24 bg-black relative overflow-hidden">
+        <section id="contact" className="py-32 bg-slate-50 relative overflow-hidden">
             {/* Decorative Background */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gold-500/5 blur-[100px] rounded-full" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-primary/10 blur-[100px] rounded-full mix-blend-multiply" />
 
             <div className="container mx-auto px-6 relative z-10">
-                <div className="grid lg:grid-cols-2 gap-16">
-                    <motion.div
-                        initial={{ opacity: 0, x: -30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <h2 className="text-4xl font-bold text-white mb-8">ติดต่อ<span className="text-gold-500">เรา</span></h2>
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                    className="text-center mb-16"
+                >
+                    <h2 className="text-4xl md:text-6xl font-bold text-slate-900 mb-4 tracking-tight">
+                        {t("ติดต่อ", "Contact")} <span className="text-brand-accent">{t("เรา", "Us")}</span>
+                    </h2>
+                    <p className="text-slate-500 text-lg">{t("เรามี 2 สาขาให้บริการ", "We have 2 branches available")}</p>
+                </motion.div>
 
-                        <div className="space-y-8">
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-zinc-900 rounded-full flex items-center justify-center text-gold-500 shrink-0">
-                                    <MapPin />
+                <div className="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
+                    {branches.map((branch, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: index * 0.2 }}
+                            className="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50"
+                        >
+                            <h3 className="text-2xl font-bold text-slate-900 mb-8 text-center">{branch.name}</h3>
+
+                            <div className="space-y-6 mb-8">
+                                {/* Address */}
+                                <div className="flex gap-4">
+                                    <div className="w-12 h-12 bg-brand-primary/5 rounded-xl flex items-center justify-center text-brand-primary shrink-0">
+                                        <MapPin size={24} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-slate-900 mb-1">{t("ที่อยู่", "Address")}</h4>
+                                        <p className="text-slate-500 text-sm whitespace-pre-line">{branch.address}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-semibold text-white mb-2">Showroom Location</h3>
-                                    <p className="text-gray-400 whitespace-pre-line">{settings.contact_address}</p>
-                                    <div className="mt-4 h-48 w-full bg-zinc-900 rounded-xl overflow-hidden border border-white/10 relative group">
-                                        {settings.contact_map_url ? (
-                                            <iframe
-                                                src={settings.contact_map_url}
-                                                width="100%"
-                                                height="100%"
-                                                style={{ border: 0 }}
-                                                allowFullScreen
-                                                loading="lazy"
-                                                referrerPolicy="no-referrer-when-downgrade"
-                                            />
-                                        ) : (
-                                            <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center text-gray-500 group-hover:bg-zinc-700 transition-colors">
-                                                <span className="flex items-center gap-2"><MapPin size={16} /> Google Map Area</span>
-                                            </div>
-                                        )}
+
+                                {/* Phone & LINE */}
+                                <div className="flex gap-4">
+                                    <div className="w-12 h-12 bg-brand-primary/5 rounded-xl flex items-center justify-center text-brand-primary shrink-0">
+                                        <Phone size={24} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-slate-900 mb-1">{t("ติดต่อ", "Contact")}</h4>
+                                        <p className="text-slate-500 text-sm">{t("โทร", "Tel")}: {branch.phone}</p>
+                                        <p className="text-slate-500 text-sm">LINE: {branch.line}</p>
+                                    </div>
+                                </div>
+
+                                {/* Opening Hours */}
+                                <div className="flex gap-4">
+                                    <div className="w-12 h-12 bg-brand-primary/5 rounded-xl flex items-center justify-center text-brand-primary shrink-0">
+                                        <Clock size={24} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-slate-900 mb-1">{t("เวลาทำการ", "Opening Hours")}</h4>
+                                        <p className="text-slate-500 text-sm">{t("จันทร์ - อาทิตย์", "Monday - Sunday")}</p>
+                                        <p className="text-slate-500 text-sm">09:00 - 19:00 {t("น.", "")}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-zinc-900 rounded-full flex items-center justify-center text-gold-500 shrink-0">
-                                    <Phone />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-semibold text-white mb-2">ข้อมูลติดต่อ</h3>
-                                    <p className="text-gray-400">โทร: {settings.contact_phone}</p>
-                                    <p className="text-gray-400">LINE: {settings.contact_line}</p>
-                                    <p className="text-gray-400">Email: {settings.contact_email}</p>
-                                </div>
+                            {/* Map */}
+                            <div className="h-[300px] w-full bg-slate-100 rounded-2xl overflow-hidden shadow-lg relative group">
+                                {branch.mapUrl ? (
+                                    <iframe
+                                        src={branch.mapUrl}
+                                        width="100%"
+                                        height="100%"
+                                        style={{ border: 0 }}
+                                        allowFullScreen
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                        className="grayscale hover:grayscale-0 transition-all duration-700"
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 bg-slate-100 flex items-center justify-center text-slate-400">
+                                        <span className="flex items-center gap-2"><MapPin size={16} /> Google Map Area</span>
+                                    </div>
+                                )}
                             </div>
-
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-zinc-900 rounded-full flex items-center justify-center text-gold-500 shrink-0">
-                                    <Clock />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-semibold text-white mb-2">เวลาทำการ</h3>
-                                    <p className="text-gray-400">จันทร์ - อาทิตย์: 09:00 - 19:00 น.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, x: 30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                        className="bg-zinc-900/50 backdrop-blur-sm p-8 rounded-3xl border border-white/5"
-                    >
-                        <h3 className="text-2xl font-bold text-white mb-6">ส่งข้อความถึงเรา</h3>
-                        <form className="space-y-6">
-                            <Input
-                                label="ชื่อ-นามสกุล"
-                                placeholder="กรอกชื่อของคุณ"
-                                variant="bordered"
-                                classNames={{
-                                    inputWrapper: "border-white/20 hover:border-gold-500/50 focus-within:!border-gold-500"
-                                }}
-                            />
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    label="เบอร์โทรศัพท์"
-                                    placeholder="099-xxx-xxxx"
-                                    variant="bordered"
-                                    classNames={{
-                                        inputWrapper: "border-white/20 hover:border-gold-500/50 focus-within:!border-gold-500"
-                                    }}
-                                />
-                                <Input
-                                    label="อีเมล"
-                                    placeholder="example@mail.com"
-                                    variant="bordered"
-                                    classNames={{
-                                        inputWrapper: "border-white/20 hover:border-gold-500/50 focus-within:!border-gold-500"
-                                    }}
-                                />
-                            </div>
-                            <Textarea
-                                label="ข้อความ"
-                                placeholder="รายละเอียดที่ต้องการสอบถาม..."
-                                minRows={4}
-                                variant="bordered"
-                                classNames={{
-                                    inputWrapper: "border-white/20 hover:border-gold-500/50 focus-within:!border-gold-500"
-                                }}
-                            />
-                            <Button
-                                className="w-full bg-gradient-to-r from-gold-400 to-gold-600 text-black font-bold shadow-lg shadow-gold-500/20"
-                                size="lg"
-                                endContent={<Send size={18} />}
-                            >
-                                ส่งข้อความ
-                            </Button>
-                        </form>
-                    </motion.div>
+                        </motion.div>
+                    ))}
                 </div>
             </div>
         </section>

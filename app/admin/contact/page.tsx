@@ -1,165 +1,166 @@
 "use client";
 
-import { Button, Input, Textarea, Card, CardBody } from "@heroui/react";
+import Button from "@/app/components/ui/button/Button";
+import Input from "@/app/components/form/input/InputField";
+import TextArea from "@/app/components/form/input/TextArea";
+import { Card, CardBody, CardHeader } from "@/app/components/ui/card/Card";
 import { useEffect, useState } from "react";
-import { Save } from "lucide-react";
+import { Save, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ContactSettingsPage() {
-    const [settings, setSettings] = useState({
-        contact_address: "",
-        contact_phone: "",
-        contact_email: "",
-        contact_line: "",
-        contact_facebook: "",
-        contact_twitter: "",
-        contact_instagram: "",
-        contact_map_url: ""
-    });
-    const [loading, setLoading] = useState(false);
-    const [mounted, setMounted] = useState(false);
+    type SettingMap = Record<string, string>;
+    const [settings, setSettings] = useState<SettingMap>({});
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
-        fetch("/api/settings")
-            .then(res => res.json())
-            .then(data => {
-                setSettings({
-                    contact_address: data.contact_address || "",
-                    contact_phone: data.contact_phone || "",
-                    contact_email: data.contact_email || "",
-                    contact_line: data.contact_line || "",
-                    contact_facebook: data.contact_facebook || "",
-                    contact_twitter: data.contact_twitter || "",
-                    contact_instagram: data.contact_instagram || "",
-                    contact_map_url: data.contact_map_url || ""
-                });
-            })
-            .catch(err => console.error("Failed to load settings", err));
+        fetchSettings();
     }, []);
 
-    const handleSave = async () => {
-        setLoading(true);
+    const fetchSettings = async () => {
         try {
-            const res = await fetch("/api/settings", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(settings),
-            });
-            if (res.ok) {
-                toast.success("Contact settings saved!");
-            }
+            const res = await fetch("/api/settings");
+            const data = await res.json();
+            setSettings(data);
         } catch (error) {
-            console.error("Error saving settings:", error);
-            toast.error("Failed to save settings.");
+            console.error("Error fetching settings:", error);
         } finally {
             setLoading(false);
         }
     };
 
-    if (!mounted) return null;
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            await fetch("/api/settings", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(settings),
+            });
+            toast.success("Contact settings saved successfully!");
+        } catch (error) {
+            console.error("Error saving settings:", error);
+            toast.error("Failed to save settings.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleChange = (key: string, value: string) => {
+        setSettings(prev => ({ ...prev, [key]: value }));
+    };
+
+    if (loading) return <div className="p-8 text-slate-900 dark:text-white">Loading...</div>;
 
     return (
-        <div className="p-8 max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-                Contact Settings
-            </h1>
+        <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6 mb-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-1">Contact Settings</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">จัดการข้อมูลติดต่อ 2 สาขา</p>
+                </div>
+                <Button
+                    variant="primary"
+                    startIcon={<Save size={18} />}
+                    disabled={saving}
+                    onClick={handleSave}
+                >
+                    {saving ? "Saving..." : "Save Changes"}
+                </Button>
+            </div>
 
-            <Card className="bg-white border border-gray-200 shadow-sm p-6">
-                <CardBody className="flex flex-col gap-6">
-
-                    {/* Contact Info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="col-span-1 md:col-span-2">
-                            <h3 className="text-xl font-bold text-slate-800 mb-4 border-b border-gray-100 pb-2">General Information</h3>
-                        </div>
-
-                        <div className="col-span-1 md:col-span-2">
-                            <Textarea
-                                label="Address"
-                                placeholder="Enter full address"
-                                variant="bordered"
-                                value={settings.contact_address}
-                                onValueChange={(v) => setSettings({ ...settings, contact_address: v })}
+            <div className="space-y-6">
+                {/* Branch 1 */}
+                <Card>
+                    <CardHeader>
+                        <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 flex items-center gap-2">
+                            <MapPin size={20} className="text-blue-600" />
+                            สาขาที่ 1
+                        </h4>
+                    </CardHeader>
+                    <CardBody className="p-4 sm:p-6 pt-0">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input
+                                label="เบอร์โทรศัพท์"
+                                placeholder="02-XXX-XXXX"
+                                value={settings.contact_phone_1 || ""}
+                                onChange={(e) => handleChange('contact_phone_1', e.target.value)}
                             />
+                            <Input
+                                label="LINE ID"
+                                placeholder="@yourlineid"
+                                value={settings.contact_line_1 || ""}
+                                onChange={(e) => handleChange('contact_line_1', e.target.value)}
+                            />
+                            <div className="col-span-1 md:col-span-2">
+                                <TextArea
+                                    label="ที่อยู่"
+                                    placeholder="123 ถนน..."
+                                    rows={3}
+                                    value={settings.contact_address_1 || ""}
+                                    onChange={(value) => handleChange('contact_address_1', value)}
+                                />
+                            </div>
+                            <div className="col-span-1 md:col-span-2">
+                                <TextArea
+                                    label="Google Maps Embed URL"
+                                    placeholder="https://www.google.com/maps/embed?pb=..."
+                                    rows={2}
+                                    value={settings.contact_map_url_1 || ""}
+                                    onChange={(value) => handleChange('contact_map_url_1', value)}
+                                    hint="วาง URL embed จาก Google Maps"
+                                />
+                            </div>
                         </div>
+                    </CardBody>
+                </Card>
 
-                        <Input
-                            label="Phone Number"
-                            placeholder="e.g. 02-123-4567"
-                            variant="bordered"
-                            value={settings.contact_phone}
-                            onValueChange={(v) => setSettings({ ...settings, contact_phone: v })}
-                        />
-                        <Input
-                            label="Email"
-                            placeholder="e.g. contact@example.com"
-                            variant="bordered"
-                            value={settings.contact_email}
-                            onValueChange={(v) => setSettings({ ...settings, contact_email: v })}
-                        />
-                        <Input
-                            label="LINE ID"
-                            placeholder="e.g. @prideauto"
-                            variant="bordered"
-                            value={settings.contact_line}
-                            onValueChange={(v) => setSettings({ ...settings, contact_line: v })}
-                        />
-                    </div>
-
-                    {/* Social Media */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div className="col-span-1 md:col-span-2">
-                            <h3 className="text-xl font-bold text-slate-800 mb-4 border-b border-gray-100 pb-2">Social Media & Map</h3>
+                {/* Branch 2 */}
+                <Card>
+                    <CardHeader>
+                        <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 flex items-center gap-2">
+                            <MapPin size={20} className="text-blue-600" />
+                            สาขาที่ 2
+                        </h4>
+                    </CardHeader>
+                    <CardBody className="p-4 sm:p-6 pt-0">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input
+                                label="เบอร์โทรศัพท์"
+                                placeholder="02-XXX-XXXX"
+                                value={settings.contact_phone_2 || ""}
+                                onChange={(e) => handleChange('contact_phone_2', e.target.value)}
+                            />
+                            <Input
+                                label="LINE ID"
+                                placeholder="@yourlineid"
+                                value={settings.contact_line_2 || ""}
+                                onChange={(e) => handleChange('contact_line_2', e.target.value)}
+                            />
+                            <div className="col-span-1 md:col-span-2">
+                                <TextArea
+                                    label="ที่อยู่"
+                                    placeholder="456 ถนน..."
+                                    rows={3}
+                                    value={settings.contact_address_2 || ""}
+                                    onChange={(value) => handleChange('contact_address_2', value)}
+                                />
+                            </div>
+                            <div className="col-span-1 md:col-span-2">
+                                <TextArea
+                                    label="Google Maps Embed URL"
+                                    placeholder="https://www.google.com/maps/embed?pb=..."
+                                    rows={2}
+                                    value={settings.contact_map_url_2 || ""}
+                                    onChange={(value) => handleChange('contact_map_url_2', value)}
+                                    hint="วาง URL embed จาก Google Maps"
+                                />
+                            </div>
                         </div>
-
-                        <Input
-                            label="Facebook URL"
-                            placeholder="https://facebook.com/..."
-                            variant="bordered"
-                            value={settings.contact_facebook}
-                            onValueChange={(v) => setSettings({ ...settings, contact_facebook: v })}
-                        />
-                        <Input
-                            label="Instagram URL"
-                            placeholder="https://instagram.com/..."
-                            variant="bordered"
-                            value={settings.contact_instagram}
-                            onValueChange={(v) => setSettings({ ...settings, contact_instagram: v })}
-                        />
-                        <Input
-                            label="Twitter/X URL"
-                            placeholder="https://twitter.com/..."
-                            variant="bordered"
-                            value={settings.contact_twitter}
-                            onValueChange={(v) => setSettings({ ...settings, contact_twitter: v })}
-                        />
-                        <Input
-                            label="Google Maps Embed URL"
-                            placeholder="https://www.google.com/maps/embed?..."
-                            variant="bordered"
-                            value={settings.contact_map_url}
-                            onValueChange={(v) => setSettings({ ...settings, contact_map_url: v })}
-                        />
-                        <div className="col-span-1 md:col-span-2">
-                            <p className="text-xs text-gray-500">For Google Maps, go to Google Maps {'>'} Share {'>'} Embed a map {'>'} Copy HTML {'>'} Paste only the src URL here.</p>
-                        </div>
-                    </div>
-
-
-                    <div className="flex justify-end pt-4 border-t border-gray-100">
-                        <Button
-                            className="bg-gold-500 text-black font-bold px-8"
-                            startContent={<Save size={20} />}
-                            isLoading={loading}
-                            onPress={handleSave}
-                        >
-                            Save Settings
-                        </Button>
-                    </div>
-
-                </CardBody>
-            </Card>
+                    </CardBody>
+                </Card>
+            </div>
         </div>
     );
 }

@@ -1,142 +1,163 @@
 "use client";
 
-import { Button, Input, Textarea, Switch, Card, CardBody } from "@heroui/react";
+import Button from "@/app/components/ui/button/Button";
+import Input from "@/app/components/form/input/InputField";
+import Switch from "@/app/components/form/switch/Switch";
+import { Card, CardBody, CardHeader } from "@/app/components/ui/card/Card";
 import { useEffect, useState } from "react";
-import { Save } from "lucide-react";
-
+import { Save, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
+
+type PopupSettings = {
+    is_active: number;
+    image_url: string;
+    link_url: string;
+    show_once_per_session: number;
+};
 
 export default function PopupManagerPage() {
-    const [settings, setSettings] = useState({
-        popup_enabled: "0",
-        popup_text: "",
-        popup_image_url: ""
+    const [settings, setSettings] = useState<PopupSettings>({
+        is_active: 0,
+        image_url: "",
+        link_url: "",
+        show_once_per_session: 1
     });
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        fetch("/api/settings")
-            .then(res => res.json())
-            .then(data => {
-                setSettings({
-                    popup_enabled: data.popup_enabled || "0",
-                    popup_text: data.popup_text || "",
-                    popup_image_url: data.popup_image_url || ""
-                });
-            })
-            .catch(err => console.error("Failed to load settings", err));
+        fetchSettings();
     }, []);
 
-    const handleSave = async () => {
-        setLoading(true);
+    const fetchSettings = async () => {
         try {
-            const res = await fetch("/api/settings", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(settings),
-            });
-            if (res.ok) {
-                toast.success("Settings saved successfully!");
-            }
+            const res = await fetch("/api/popup");
+            const data = await res.json();
+            // Ensure boolean-like values are handled if API returns them differently
+            setSettings(data);
         } catch (error) {
-            console.error("Error saving settings:", error);
-            toast.error("Failed to save settings.");
+            console.error("Error fetching popup settings:", error);
         } finally {
             setLoading(false);
         }
     };
 
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            await fetch("/api/popup", {
+                method: "POST", // API might be PUT or POST, assuming POST for upsert/update here based on previous context, or sticking to existing pattern
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(settings),
+            });
+            toast.success("Popup settings saved successfully!");
+        } catch (error) {
+            console.error("Error saving popup settings:", error);
+            toast.error("Failed to save settings.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (loading) return <div className="p-8 text-slate-900 dark:text-white">Loading...</div>;
+
     return (
-        <div className="p-8 max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-                Popup Manager
-            </h1>
+        <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6 mb-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-1">จัดการป๊อปอัพ</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">ตั้งค่าป๊อปอัพหน้าแรก</p>
+                </div>
+                <Button
+                    variant="primary"
+                    startIcon={<Save size={18} />}
+                    disabled={saving}
+                    onClick={handleSave}
+                >
+                    {saving ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
+                </Button>
+            </div>
 
-            <Card className="bg-white border border-gray-200 shadow-sm p-6">
-                <CardBody className="flex flex-col gap-6">
-
-                    {/* Enable Toggle */}
-                    <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-100">
-                        <div className="flex flex-col">
-                            <span className="text-slate-900 font-bold">Enable Popup</span>
-                            <span className="text-gray-500 text-sm">Show this popup on the homepage</span>
+            <Card>
+                <CardHeader>
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90">เนื้อหาป๊อปอัพ</h4>
+                </CardHeader>
+                <CardBody className="p-4 sm:p-6 pt-0 space-y-6">
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-8">
+                            <Switch
+                                label="เปิดใช้งานป๊อปอัพ"
+                                checked={settings.is_active === 1}
+                                onChange={(checked) => setSettings({ ...settings, is_active: checked ? 1 : 0 })}
+                            />
+                            <Switch
+                                label="แสดงครั้งเดียวต่อเซสชั่น"
+                                checked={settings.show_once_per_session === 1}
+                                onChange={(checked) => setSettings({ ...settings, show_once_per_session: checked ? 1 : 0 })}
+                            />
                         </div>
-                        <Switch
-                            isSelected={settings.popup_enabled === "1"}
-                            onValueChange={(val) => setSettings({ ...settings, popup_enabled: val ? "1" : "0" })}
-                            color="success"
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-400">Popup Image</label>
+                            <div className="flex gap-4 items-start">
+                                <div className="flex-1">
+                                    <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 dark:hover:bg-gray-800 dark:bg-gray-700 dark:border-gray-600">
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <UploadCloud className="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" />
+                                            <p className="text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span></p>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={async (e) => {
+                                                const file = e.target.files?.[0];
+                                                if (!file) return;
+
+                                                const formData = new FormData();
+                                                formData.append("file", file);
+
+                                                try {
+                                                    const res = await fetch("/api/upload", {
+                                                        method: "POST",
+                                                        body: formData
+                                                    });
+                                                    const data = await res.json();
+                                                    if (data.success) {
+                                                        setSettings(prev => ({ ...prev, image_url: data.url }));
+                                                    }
+                                                } catch (error) {
+                                                    console.error("Upload failed", error);
+                                                    toast.error("Upload failed!");
+                                                }
+                                            }}
+                                        />
+                                    </label>
+                                </div>
+                                {settings.image_url && (
+                                    <div className="relative w-48 h-48 rounded-lg overflow-hidden border border-gray-200 shrink-0">
+                                        <Image
+                                            src={settings.image_url}
+                                            alt="Preview"
+                                            fill
+                                            className="object-contain bg-black/5"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <Input
+                            label="Link URL (Optional)"
+                            placeholder="https://..."
+                            value={settings.link_url || ""}
+                            onChange={(e) => setSettings({ ...settings, link_url: e.target.value })}
+                            hint="Redirect users when they click the popup"
                         />
                     </div>
-
-                    {/* Image Upload */}
-                    <div className="flex flex-col gap-2">
-                        <label className="text-slate-900 font-medium">Popup Image</label>
-                        <div className="flex gap-4 items-start">
-                            <div className="flex-1">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gold-500 file:text-black hover:file:bg-gold-600 mb-2"
-                                    onChange={async (e) => {
-                                        const file = e.target.files?.[0];
-                                        if (!file) return;
-
-                                        const formData = new FormData();
-                                        formData.append("file", file);
-
-                                        try {
-                                            const res = await fetch("/api/upload", { method: "POST", body: formData });
-                                            const data = await res.json();
-                                            if (data.success) {
-                                                setSettings(prev => ({ ...prev, popup_image_url: data.url }));
-                                            }
-                                        } catch (error) {
-                                            console.error("Upload failed", error);
-                                        }
-                                    }}
-                                />
-                                <span className="text-xs text-gray-500">Recommended size: 600x400px</span>
-                            </div>
-
-                            {settings.popup_image_url && (
-                                <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-200">
-                                    <img
-                                        src={settings.popup_image_url}
-                                        alt="Preview"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Text Message */}
-                    <Textarea
-                        label="Popup Message"
-                        placeholder="Enter your promotional message..."
-                        variant="bordered"
-                        minRows={3}
-                        value={settings.popup_text}
-                        onValueChange={(v) => setSettings({ ...settings, popup_text: v })}
-                        classNames={{
-                            label: "text-slate-900",
-                            input: "text-slate-900"
-                        }}
-                    />
-
-                    <div className="flex justify-end pt-4 border-t border-gray-100">
-                        <Button
-                            className="bg-gold-500 text-black font-bold px-8"
-                            startContent={<Save size={20} />}
-                            isLoading={loading}
-                            onPress={handleSave}
-                        >
-                            Save Changes
-                        </Button>
-                    </div>
-
                 </CardBody>
             </Card>
-        </div>
+        </div >
     );
 }

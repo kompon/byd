@@ -1,28 +1,191 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --background: #050505;
-  --foreground: #ededed;
+  /* Sporty Mono Dark Blue - Light Mode */
+  --background: #ffffff;
+  --foreground: #020617;
+  /* Slate 950 */
+
+  --card: #ffffff;
+  --card-foreground: #020617;
+
+  --popover: #ffffff;
+  --popover-foreground: #020617;
+
+  --primary: #1E3A8A;
+  /* Dark Blue (Blue 900) */
+  --primary-foreground: #ffffff;
+
+  --secondary: #f1f5f9;
+  /* Slate 100 */
+  --secondary-foreground: #0f172a;
+
+  --muted: #f8fafc;
+  --muted-foreground: #475569;
+
+  --accent: #f1f5f9;
+  /* Hover muted */
+  --accent-foreground: #0f172a;
+
+  --brand: #1E3A8A;
+  /* Dark Blue */
+  --brand-foreground: #ffffff;
+
+  --destructive: #dc2626;
+  /* Error/Delete stays Red */
+  --destructive-foreground: #ffffff;
+
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #1E3A8A;
+  /* Dark Blue Ring */
 }
 
-@theme inline {
+.dark {
+  /* Sporty Mono Dark Blue - Dark Mode */
+  --background: #020617;
+  --foreground: #f8fafc;
+
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
+
+  --popover: #0f172a;
+  --popover-foreground: #f8fafc;
+
+  --primary: #3B82F6;
+  /* Lighter Blue for visibility */
+  --primary-foreground: #ffffff;
+
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
+
+  --brand: #3B82F6;
+  --brand-foreground: #ffffff;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #3B82F6;
+}
+
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-gold-50: #fbf8eb;
-  --color-gold-100: #f5eed1;
-  --color-gold-200: #ead9a8;
-  --color-gold-300: #dec07a;
-  --color-gold-400: #d2a651;
-  --color-gold-500: #cc913b;
-  --color-gold-600: #b0732e;
-  --color-gold-700: #8c5628;
-  --color-gold-800: #744626;
-  --color-gold-900: #603b24;
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+
+  --shadow-theme-md:
+    0px 4px 8px -2px rgba(16, 24, 40, 0.1),
+    0px 2px 4px -2px rgba(16, 24, 40, 0.06);
+  --shadow-theme-lg:
+    0px 12px 16px -4px rgba(16, 24, 40, 0.08),
+    0px 4px 6px -2px rgba(16, 24, 40, 0.03);
+  --shadow-theme-sm:
+    0px 1px 3px 0px rgba(16, 24, 40, 0.1),
+    0px 1px 2px 0px rgba(16, 24, 40, 0.06);
+  --shadow-theme-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
 }
 
 @layer base {
   body {
-    @apply bg-background text-foreground antialiased selection:bg-gold-500/30 selection:text-gold-200;
+    @apply relative font-sans z-1 bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-400;
+  }
+}
+
+@utility menu-item {
+  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-sm;
+}
+
+@utility menu-item-active {
+  @apply bg-blue-900/10 text-blue-900 dark:bg-blue-500/20 dark:text-white;
+}
+
+@utility menu-item-inactive {
+  @apply text-slate-700 hover:bg-slate-100 group-hover:text-slate-700 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-slate-300;
+}
+
+@utility menu-item-icon {
+  @apply text-slate-500 group-hover:text-slate-700 dark:text-slate-400;
+}
+
+@utility menu-item-icon-active {
+  @apply text-blue-900 dark:text-white;
+}
+
+@utility menu-item-icon-inactive {
+  @apply text-slate-500 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-300;
+}
+
+@utility menu-dropdown-item {
+  @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium;
+}
+
+@utility menu-dropdown-item-active {
+  @apply bg-blue-900/10 text-blue-900 dark:bg-blue-500/20 dark:text-white;
+}
+
+@utility menu-dropdown-item-inactive {
+  @apply text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5;
+}
+
+@utility menu-dropdown-badge {
+  @apply block rounded-full px-2.5 py-0.5 text-xs font-medium uppercase text-blue-900 dark:text-white;
+}
+
+@utility menu-dropdown-badge-active {
+  @apply bg-blue-900/20 dark:bg-blue-500/30;
+}
+
+@utility menu-dropdown-badge-inactive {
+  @apply bg-slate-100 group-hover:bg-slate-200 dark:bg-white/10 dark:group-hover:bg-white/20;
+}
+
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
+    @apply size-1.5;
+  }
+
+  &::-webkit-scrollbar-track {
+    @apply rounded-full;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 rounded-full dark:bg-gray-700;
   }
 }
