@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Award, Trophy, Star, Medal } from "lucide-react";
-import { Image } from "@heroui/react";
+import { Image, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/react";
 import { useState, useEffect } from "react";
 import React from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
@@ -32,8 +32,11 @@ type AwardData = {
     display_order: number;
 };
 
-const AwardCard = ({ award }: { award: AwardData }) => (
-    <div className="group relative bg-white rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300 aspect-[5/4] flex flex-col">
+const AwardCard = ({ award, onPress }: { award: AwardData, onPress: () => void }) => (
+    <div
+        onClick={onPress}
+        className="group relative bg-white rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300 aspect-[4/3] flex flex-col cursor-pointer"
+    >
         {/* Image Section */}
         <div className="relative flex-grow overflow-hidden">
             <Image
@@ -75,7 +78,14 @@ const AwardCard = ({ award }: { award: AwardData }) => (
 export const AboutSection = () => {
     const [awards, setAwards] = useState<AwardData[]>([]);
     const [loading, setLoading] = useState(true);
-    const { t } = useLanguage();
+    const { t, lang } = useLanguage();
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [selectedAward, setSelectedAward] = useState<AwardData | null>(null);
+
+    const handleCardClick = (award: AwardData) => {
+        setSelectedAward(award);
+        onOpen();
+    };
 
     useEffect(() => {
         const fetchAwards = async () => {
@@ -159,12 +169,73 @@ export const AboutSection = () => {
                     >
                         {awards.map((award) => (
                             <SwiperSlide key={award.id} className="h-auto">
-                                <AwardCard award={award} />
+                                <AwardCard award={award} onPress={() => handleCardClick(award)} />
                             </SwiperSlide>
                         ))}
                     </Swiper>
                 </motion.div>
             </div>
+
+            {/* Award Modal */}
+            <Modal
+                isOpen={isOpen}
+                onOpenChange={onOpenChange}
+                size="4xl"
+                scrollBehavior="inside"
+                backdrop="blur"
+                classNames={{
+                    backdrop: "bg-slate-900/50 backdrop-blur-md",
+                    base: "bg-white border border-slate-100 shadow-2xl rounded-[2rem]",
+                    header: "border-b border-slate-100 p-6",
+                    body: "p-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']",
+                    footer: "border-t border-slate-100 p-4",
+                    closeButton: "top-4 right-4 z-50 bg-white/50 hover:bg-white p-2 text-slate-500 rounded-full shadow-sm backdrop-blur-sm",
+                }}
+            >
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1 pr-12">
+                                <h3 className="text-2xl font-bold text-slate-900">{selectedAward?.title}</h3>
+                                <span className="text-sm font-medium text-brand-primary flex items-center gap-2">
+                                    <span className="bg-brand-primary/10 px-2 py-1 rounded-md">{selectedAward?.year}</span>
+                                </span>
+                            </ModalHeader>
+                            <ModalBody>
+                                {selectedAward?.image_url && (
+                                    <div className="w-full bg-slate-50 border-b border-slate-100 flex justify-center items-center p-4">
+                                        <Image
+                                            src={selectedAward.image_url}
+                                            alt={selectedAward.title}
+                                            className="max-h-[300px] md:max-h-[400px] w-auto h-auto object-contain shadow-md rounded-lg"
+                                            radius="none"
+                                        />
+                                    </div>
+                                )}
+                                <div className="p-8">
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0">
+                                            {selectedAward?.icon && iconMap[selectedAward.icon] && React.createElement(iconMap[selectedAward.icon], { className: "w-8 h-8 text-brand-primary" })}
+                                        </div>
+                                        <div>
+                                            <h4 className="text-lg font-bold text-slate-900 mb-1">{t("รายละเอียดรางวัล", "Award Details")}</h4>
+                                            <p className="text-slate-500 font-light">{selectedAward?.year}</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-slate-600 text-lg leading-relaxed font-light">
+                                        {selectedAward?.description}
+                                    </p>
+                                </div>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose} className="font-medium">
+                                    {t("ปิด", "Close")}
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </section>
     );
 };

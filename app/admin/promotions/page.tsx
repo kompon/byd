@@ -150,7 +150,9 @@ export default function PromotionsPage() {
                         promos.map((item) => (
                             <TableRow key={item.id}>
                                 <TableCell>
-                                    <span className="font-semibold text-gray-800 dark:text-white/90">{item.title}</span>
+                                    <span className="font-semibold text-gray-800 dark:text-white/90 block truncate max-w-[350px]" title={item.title}>
+                                        {item.title}
+                                    </span>
                                 </TableCell>
                                 <TableCell>
                                     <span className="capitalize">{item.type}</span>

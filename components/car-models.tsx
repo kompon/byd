@@ -28,7 +28,7 @@ const CarCard = ({ car, t }: { car: any, t: any }) => (
         <div className="absolute inset-0 rounded-[2rem] shadow-inner shadow-blue-200/50 group-hover:shadow-blue-300/70 transition-shadow duration-500"></div>
 
         <CardBody className="overflow-visible p-0 relative h-48 w-full flex items-center justify-center z-10">
-            <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-[110%] h-auto z-20 transition-transform duration-500 group-hover:-translate-y-6 group-hover:scale-[1.15] drop-shadow-2xl group-hover:drop-shadow-[0_25px_50px_rgba(59,130,246,0.3)]">
+            <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-full max-w-[340px] h-auto z-20 transition-transform duration-500 group-hover:-translate-y-6 group-hover:scale-[1.1] drop-shadow-2xl group-hover:drop-shadow-[0_25px_50px_rgba(59,130,246,0.3)]">
                 <Image
                     radius="none"
                     width="100%"
@@ -50,19 +50,18 @@ const CarCard = ({ car, t }: { car: any, t: any }) => (
             <div className="w-full pt-3 border-t border-gradient-to-r from-blue-200 via-indigo-200 to-purple-200 mt-1 relative">
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50"></div>
                 {car.variants && car.variants.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-2 divide-x divide-blue-200/50">
-                        {car.variants.slice(0, 2).map((variant: any, index: number) => (
-                            <div key={index} className={`flex flex-col ${index > 0 ? 'pl-2' : ''}`}>
-                                <p className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-0.5 truncate">{variant.name}</p>
-                                <p className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">฿{parseInt(variant.price).toLocaleString()}</p>
+                    <div className={`grid ${car.variants.length > 2 ? 'grid-cols-3 gap-1' : 'grid-cols-2 gap-2'} divide-x divide-blue-200/50`}>
+                        {car.variants.map((variant: any, index: number) => (
+                            <div key={index} className={`flex flex-col ${index > 0 ? (car.variants.length > 2 ? 'pl-1' : 'pl-2') : ''}`}>
+                                <p className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-0.5 truncate" title={variant.name}>{variant.name}</p>
+                                <p className={`${car.variants.length > 2 ? 'text-xs' : 'text-sm'} font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tighter`}>฿{parseInt(variant.price).toLocaleString()}</p>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <>
-                        <p className="text-slate-500 text-xs mb-1">{t("เริ่มต้นที่", "Starting at")}</p>
-                        <p className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">฿{parseInt(car.base_price).toLocaleString()}</p>
-                    </>
+                    <div className="flex flex-col justify-center h-full">
+                        <p className="text-slate-500 text-xs mb-1">{t("สอบถามรายละเอียดเพิ่มเติม", "Contact for details")}</p>
+                    </div>
                 )}
             </div>
 
@@ -132,23 +131,46 @@ export const CarModels = () => {
                     </Swiper>
                 </div>
 
-                {/* Desktop Grid */}
+                {/* Desktop Carousel (Replaces Grid) */}
                 <motion.div
-                    className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-8 overflow-visible"
+                    className="hidden md:block"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: "-100px" }}
-                    variants={staggerContainer}
+                    variants={fadeInUp}
                 >
-                    {cars.map((car, index) => (
-                        <motion.div
-                            key={car.id}
-                            variants={fadeInUp}
-                            whileHover={{ y: -10, transition: { duration: 0.3 } }}
-                        >
-                            <CarCard car={car} t={t} />
-                        </motion.div>
-                    ))}
+                    <Swiper
+                        modules={[Autoplay, Pagination]}
+                        spaceBetween={24}
+                        slidesPerView={2.2}
+                        centeredSlides={false}
+                        loop={true}
+                        autoplay={{
+                            delay: 4000,
+                            disableOnInteraction: false,
+                        }}
+                        pagination={{
+                            clickable: true,
+                            dynamicBullets: true,
+                        }}
+                        breakpoints={{
+                            1024: {
+                                slidesPerView: 2.8,
+                                spaceBetween: 32,
+                            },
+                            1280: {
+                                slidesPerView: 3,
+                                spaceBetween: 32,
+                            },
+                        }}
+                        className="pb-16 px-4 !overflow-visible"
+                    >
+                        {cars.map((car) => (
+                            <SwiperSlide key={car.id} className="h-auto pt-8">
+                                <CarCard car={car} t={t} />
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
                 </motion.div>
             </div>
         </section>

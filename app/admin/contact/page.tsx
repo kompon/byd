@@ -81,6 +81,14 @@ export default function ContactSettingsPage() {
                     </CardHeader>
                     <CardBody className="p-4 sm:p-6 pt-0">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="col-span-1 md:col-span-2">
+                                <Input
+                                    label="ชื่อสาขา"
+                                    placeholder="เช่น สาขาที่ 1 (คลองเตย)"
+                                    value={settings.contact_name_1 || ""}
+                                    onChange={(e) => handleChange('contact_name_1', e.target.value)}
+                                />
+                            </div>
                             <Input
                                 label="เบอร์โทรศัพท์"
                                 placeholder="02-XXX-XXXX"
@@ -126,6 +134,14 @@ export default function ContactSettingsPage() {
                     </CardHeader>
                     <CardBody className="p-4 sm:p-6 pt-0">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="col-span-1 md:col-span-2">
+                                <Input
+                                    label="ชื่อสาขา"
+                                    placeholder="เช่น สาขาที่ 2 (สาทร)"
+                                    value={settings.contact_name_2 || ""}
+                                    onChange={(e) => handleChange('contact_name_2', e.target.value)}
+                                />
+                            </div>
                             <Input
                                 label="เบอร์โทรศัพท์"
                                 placeholder="02-XXX-XXXX"

@@ -123,7 +123,7 @@ export default function AwardsPage() {
     };
 
     return (
-        <div className="p-6">
+        <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6 mb-6">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
@@ -143,7 +143,7 @@ export default function AwardsPage() {
             {loading ? (
                 <div className="text-center py-12 text-gray-500">กำลังโหลด...</div>
             ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -171,8 +171,12 @@ export default function AwardsPage() {
                                             />
                                         )}
                                     </TableCell>
-                                    <TableCell className="font-medium">{award.title}</TableCell>
-                                    <TableCell className="max-w-xs truncate">{award.description}</TableCell>
+                                    <TableCell>
+                                        <div className="font-medium max-w-[200px] truncate" title={award.title}>{award.title}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="max-w-[200px] truncate" title={award.description}>{award.description}</div>
+                                    </TableCell>
                                     <TableCell>
                                         <Badge color="info">{award.year}</Badge>
                                     </TableCell>

@@ -16,7 +16,7 @@ import { fadeInUp, staggerContainer } from "./utils/animations";
 const NewsCard = ({ item, t, lang, onPress }: { item: any, t: any, lang: any, onPress: () => void }) => (
     <div
         onClick={onPress}
-        className="group relative bg-white rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300 aspect-[5/4] flex flex-col cursor-pointer"
+        className="group relative bg-white rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300 aspect-[4/3] flex flex-col cursor-pointer"
     >
         {/* Image Section */}
         <div className="relative flex-grow overflow-hidden">
@@ -41,13 +41,13 @@ const NewsCard = ({ item, t, lang, onPress }: { item: any, t: any, lang: any, on
         </div>
 
         {/* Content Section */}
-        <div className="p-6 shrink-0 bg-white relative">
+        <div className="p-8 shrink-0 bg-white relative">
             <div className="flex items-center gap-2 text-brand-primary text-xs font-bold tracking-widest uppercase mb-3">
                 <Calendar size={14} />
                 <span>{new Date(item.start_date).toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-US')}</span>
             </div>
 
-            <h3 className="text-xl font-bold text-slate-900 leading-tight group-hover:text-brand-accent transition-colors line-clamp-1 mb-2">
+            <h3 className="text-2xl font-bold text-slate-900 leading-tight group-hover:text-brand-accent transition-colors line-clamp-1 mb-2">
                 {item.title}
             </h3>
             <p className="text-slate-500 text-sm leading-relaxed line-clamp-2 font-light">
@@ -140,22 +140,42 @@ export const NewsPromo = () => {
                 </motion.div>
 
                 {/* Desktop Grid */}
+                {/* Desktop Carousel (Replaces Grid) */}
                 <motion.div
-                    className="hidden md:grid md:grid-cols-3 gap-8"
+                    className="hidden md:block"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: "-100px" }}
-                    variants={staggerContainer}
+                    variants={fadeInUp}
                 >
-                    {news.map((item, index) => (
-                        <motion.div
-                            key={item.id}
-                            variants={fadeInUp}
-                            className="h-full"
-                        >
-                            <NewsCard item={item} t={t} lang={lang} onPress={() => handleCardClick(item)} />
-                        </motion.div>
-                    ))}
+                    <Swiper
+                        modules={[Autoplay, Pagination]}
+                        spaceBetween={24}
+                        slidesPerView={2}
+                        centeredSlides={false}
+                        loop={true}
+                        autoplay={{
+                            delay: 5000,
+                            disableOnInteraction: false,
+                        }}
+                        pagination={{
+                            clickable: true,
+                            dynamicBullets: true,
+                        }}
+                        breakpoints={{
+                            1024: {
+                                slidesPerView: 2.5,
+                                spaceBetween: 32,
+                            }
+                        }}
+                        className="pb-16 px-4 !overflow-visible max-w-[1400px] mx-auto"
+                    >
+                        {news.map((item) => (
+                            <SwiperSlide key={item.id} className="h-auto">
+                                <NewsCard item={item} t={t} lang={lang} onPress={() => handleCardClick(item)} />
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
                 </motion.div>
             </div>
 
@@ -187,13 +207,12 @@ export const NewsPromo = () => {
                             </ModalHeader>
                             <ModalBody>
                                 {selectedItem?.banner_image_url && (
-                                    <div className="w-full relative aspect-video">
+                                    <div className="w-full bg-slate-50 border-b border-slate-100 flex justify-center items-center p-4">
                                         <Image
                                             src={selectedItem.banner_image_url}
                                             alt={selectedItem.title}
-                                            className="w-full h-full object-cover"
+                                            className="max-h-[300px] md:max-h-[400px] w-auto h-auto object-contain shadow-md rounded-lg"
                                             radius="none"
-                                            width="100%"
                                         />
                                     </div>
                                 )}

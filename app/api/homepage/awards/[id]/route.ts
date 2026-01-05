@@ -4,8 +4,9 @@ import { ResultSetHeader } from "mysql2";
 
 export async function PUT(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
+    const params = await props.params;
     try {
         const body = await req.json();
         const { title, description, year, icon, image_url, display_order, is_active } = body;
@@ -24,8 +25,9 @@ export async function PUT(
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
+    const params = await props.params;
     try {
         await pool.query<ResultSetHeader>(
             "DELETE FROM homepage_awards WHERE id = ?",

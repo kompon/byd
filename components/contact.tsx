@@ -9,11 +9,13 @@ export const ContactSection = () => {
     const { t } = useLanguage();
     const [settings, setSettings] = useState({
         // Branch 1
+        contact_name_1: "",
         contact_address_1: "123 คลองเตย...",
         contact_phone_1: "02-123-4567",
         contact_line_1: "@prideauto",
         contact_map_url_1: "",
         // Branch 2
+        contact_name_2: "",
         contact_address_2: "456 สาทร...",
         contact_phone_2: "02-789-0123",
         contact_line_2: "@prideauto2",
@@ -32,20 +34,32 @@ export const ContactSection = () => {
             .catch(err => console.error("Failed to load contact info", err));
     }, []);
 
+    const extractMapUrl = (input: string) => {
+        if (!input) return "";
+        // If it's already a URL (starts with http), return it
+        if (input.trim().startsWith("http")) return input;
+
+        // If it's an iframe tag, try to extract the src
+        const srcMatch = input.match(/src="([^"]*)"/);
+        if (srcMatch && srcMatch[1]) return srcMatch[1];
+
+        return input;
+    };
+
     const branches = [
         {
-            name: t("สาขาที่ 1", "Branch 1"),
+            name: settings.contact_name_1 || t("สาขาที่ 1", "Branch 1"),
             address: settings.contact_address_1,
             phone: settings.contact_phone_1,
             line: settings.contact_line_1,
-            mapUrl: settings.contact_map_url_1,
+            mapUrl: extractMapUrl(settings.contact_map_url_1),
         },
         {
-            name: t("สาขาที่ 2", "Branch 2"),
+            name: settings.contact_name_2 || t("สาขาที่ 2", "Branch 2"),
             address: settings.contact_address_2,
             phone: settings.contact_phone_2,
             line: settings.contact_line_2,
-            mapUrl: settings.contact_map_url_2,
+            mapUrl: extractMapUrl(settings.contact_map_url_2),
         }
     ];
 
@@ -111,8 +125,8 @@ export const ContactSection = () => {
                                     </div>
                                     <div>
                                         <h4 className="font-semibold text-slate-900 mb-1">{t("เวลาทำการ", "Opening Hours")}</h4>
-                                        <p className="text-slate-500 text-sm">{t("จันทร์ - อาทิตย์", "Monday - Sunday")}</p>
-                                        <p className="text-slate-500 text-sm">09:00 - 19:00 {t("น.", "")}</p>
+                                        <p className="text-slate-500 text-sm">{t("จันทร์ - เสาร์", "Monday - Saturday")}</p>
+                                        <p className="text-slate-500 text-sm">08:00 - 17:00 {t("น.", "")}</p>
                                     </div>
                                 </div>
                             </div>
@@ -128,7 +142,7 @@ export const ContactSection = () => {
                                         allowFullScreen
                                         loading="lazy"
                                         referrerPolicy="no-referrer-when-downgrade"
-                                        className="grayscale hover:grayscale-0 transition-all duration-700"
+                                        className="w-full h-full object-cover transition-all duration-700"
                                     />
                                 ) : (
                                     <div className="absolute inset-0 bg-slate-100 flex items-center justify-center text-slate-400">

@@ -135,7 +135,7 @@ export default function CarModelsPage() {
                 <TableHeader>
                     <TableRow>
                         <TableCell isHeader>ชื่อรุ่น</TableCell>
-                        <TableCell isHeader>ราคา</TableCell>
+
                         <TableCell isHeader>สถานะ</TableCell>
                         <TableCell isHeader>จัดการ</TableCell>
                     </TableRow>
@@ -143,11 +143,11 @@ export default function CarModelsPage() {
                 <TableBody>
                     {loading ? (
                         <TableRow>
-                            <TableCell colSpan={4} className="text-center py-8">Loading...</TableCell>
+                            <TableCell colSpan={3} className="text-center py-8">Loading...</TableCell>
                         </TableRow>
                     ) : cars.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={4} className="text-center py-8">No cars found</TableCell>
+                            <TableCell colSpan={3} className="text-center py-8">No cars found</TableCell>
                         </TableRow>
                     ) : (
                         cars.map((item) => (
@@ -158,7 +158,7 @@ export default function CarModelsPage() {
                                         <span className="text-xs text-gray-500">{item.slug}</span>
                                     </div>
                                 </TableCell>
-                                <TableCell>฿{parseInt(item.base_price).toLocaleString()}</TableCell>
+
                                 <TableCell>
                                     <StatusBadge isActive={item.status === 'active'} />
                                 </TableCell>
