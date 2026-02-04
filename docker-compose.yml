@@ -54,10 +54,7 @@ services:
     container_name: byd-nginx
     restart: unless-stopped
     ports:
-      # Map Host Port 8081 -> Container Port 80
-      # (Change 8081 to any free port if needed)
-      - "8081:80"
-      # - "443:443" # Disable HTTPS on container, let the Main Server handle SSL
+      - "81:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
