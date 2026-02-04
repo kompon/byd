@@ -82,13 +82,10 @@ export const AppNavbar = () => {
                 <NavbarBrand>
                     <Link href="/" className="flex items-center gap-3 group" onPress={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
                         {siteLogo && (
-                            <NextImage
+                            <img
                                 src={siteLogo}
                                 alt="BYD PRIDE AUTO"
-                                width={120}
-                                height={56}
                                 className="h-14 w-auto object-contain drop-shadow-sm"
-                                priority
                             />
                         )}
                     </Link>
