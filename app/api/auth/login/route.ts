@@ -14,15 +14,22 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Username and password are required' }, { status: 400 });
         }
 
+        console.log('Login attempt for:', username);
+
         const [rows] = await pool.query('SELECT * FROM admins WHERE username = ?', [username]);
         const admins = rows as any[];
 
+        console.log('DB Search Result:', admins.length > 0 ? 'Found' : 'Not Found');
+
         if (admins.length === 0) {
+            console.log('Login failed: User not found');
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
         }
 
         const admin = admins[0];
         const isValid = await bcrypt.compare(password, admin.password_hash);
+
+        console.log('Password Check:', isValid ? 'Pass' : 'Fail');
 
         if (!isValid) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
@@ -40,7 +47,7 @@ export async function POST(request: Request) {
         // Set HttpOnly Cookie
         response.cookies.set('admin_token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: false, // Allow HTTP for Port 81 access
             sameSite: 'strict',
             maxAge: 60 * 60 * 24, // 1 day
             path: '/',
