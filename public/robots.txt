@@ -1,0 +1,12 @@
+# Robots.txt for BYD PRIDE AUTO
+# https://bydprideautogroup.online
+
+User-agent: *
+Allow: /
+
+# Disallow admin pages
+Disallow: /admin
+Disallow: /api
+
+# Sitemap
+Sitemap: https://bydprideautogroup.online/sitemap.xml
